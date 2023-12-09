@@ -1,0 +1,193 @@
+section.function-library {
+    position: fixed;
+    z-index: 6;
+    left: 1vw;
+    top: 10vw;
+    width: 30vw;
+    height: calc(100vh - 20vw);
+    background-color: lightgray;
+    border-radius: 1vw;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+div.function {
+    margin: 1vw;
+    display: block;
+    width: 28vw;
+    background-color: green;
+    border-radius: 0.5vw;
+    padding-top: 1vw;
+    padding-bottom: 0.5vw;
+}
+
+p.title {
+    font-size: 3vw;
+    background-color: lightpink;
+    border-radius: 1vw;
+    margin: 1vw;
+    margin-top: 0;
+    padding: 1vw;
+    padding-top: 0;
+    display: block;
+    color: brown;
+}
+
+p.description {
+    font-size: 1vw;
+    color: white;
+    background-color: darkgreen;
+    padding-left: 0.5vw;
+    padding-right: 0.5vw;
+    font-style: italic;
+}
+
+div.args {
+    background-color: lightpink;
+    border-radius: 1vw;
+    font-size: 1vw;
+    padding: 1vw;
+    margin: 0.5vw;
+}
+
+div.arg {
+    background-color: lightcoral;
+    border-radius: 0.5vw;
+    padding: 0.25vw;
+    margin-top: 0.5vw;
+}
+
+p.arg-title {
+    font-size: 1vw;
+    background-color: lightpink;
+    border-radius: 0.5vw;
+    padding: 0.25vw;
+}
+
+p.arg-description {
+    font-size: 0.75vw;
+    font-style: italic;
+}
+
+section#samples {
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+section#controls {
+    position: absolute;
+    top: 1vw;
+    left: 1vw;
+    width: 97vw;
+    background-color: lightgray;
+    border-radius: 0.5vw;
+    height: 4vw;
+    padding: 0.5vw;
+    z-index: 3;
+}
+
+div#scroller {
+    display: inline-block;
+    width: 75vw;
+    height: 4vw;
+    background-color: grey;
+    margin-right: 0.5vw;
+}
+
+div#scrollview, div#zoomview {
+    opacity: 0.5;
+    background-color: orange;
+    width: 1vw;
+    height: 4vw;
+    position: relative;
+    top: 0;
+}
+
+div#zoomer {
+    display: inline-block;
+    width: 15vw;
+    height: 4vw;
+    background-color: gray;
+}
+
+div.sample {
+    position: absolute;
+    bottom: 50vh;
+    height: 25vh;
+    background-color: grey;
+}
+
+div.sample.selected {
+    background-color: lightblue;
+}
+
+div.sample.really-selected {
+    background-color: blue;
+}
+
+div#but {
+    display: inline-block;
+    height: 4vw;
+    background-color: green;
+    top: 0;
+    margin-right: 0.5vw;
+    width: 4vw;
+}
+
+div#but:hover {
+    background-color: lightgreen;
+}
+
+section#edit-interface {
+    z-index: 5;
+    bottom: 1vw;
+    left: 1vw;
+    position: fixed;
+}
+
+div#cursor-line {
+    position: absolute;
+    z-index: 4;
+    top: 0;
+    left: 0;
+    height: calc(100vh - 20vw);
+    top: 10vw;
+    width: 2px;
+    background-color: black;
+}
+
+body {
+    overflow: hidden;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; 
+
+    font-family: Verdana;
+}
+
+.hidden {
+    display: none;
+}
+
+label {
+    position: absolute;
+    bottom: 1vw;
+    left: 5vw;
+    display: none;
+}
+
+input {
+    position: absolute;
+    bottom: 1vw;
+    left: 10vw;
+    width: 80vw;
+    border: none;
+    font-size: 4vw;
+}
+
+html {
+    box-sizing: border-box;
+}

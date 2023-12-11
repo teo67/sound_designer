@@ -77,9 +77,8 @@ section#samples {
     z-index: 0;
 }
 
-section#controls {
+section#controls, section#controls-bottom {
     position: absolute;
-    top: 1vw;
     left: 1vw;
     width: 97vw;
     background-color: lightgray;
@@ -87,6 +86,14 @@ section#controls {
     height: 4vw;
     padding: 0.5vw;
     z-index: 3;
+}
+
+section#controls {
+    top: 1vw;
+}
+
+section#controls-bottom {
+    bottom: 1vw;
 }
 
 div#scroller {
@@ -113,6 +120,10 @@ div#zoomer {
     background-color: gray;
 }
 
+div#zoomer:hover, div#scroller:hover {
+    cursor: pointer;
+}
+
 div.sample {
     position: absolute;
     bottom: 50vh;
@@ -122,6 +133,7 @@ div.sample {
 
 div.selected {
     position: absolute;
+    top: 0;
     background-color: blue;
     height: 100vh;
     opacity: 0.5;
@@ -129,6 +141,7 @@ div.selected {
 
 div.selecting {
     position: absolute;
+    top: 0;
     background-color: lightblue;
     height: 100vh;
     opacity: 0.5;
@@ -143,8 +156,27 @@ div#but {
     width: 4vw;
 }
 
+
 div#but:hover {
     background-color: lightgreen;
+    cursor: pointer;
+}
+
+div#change-sound-length, div#change-sample-rate {
+    display: inline-block;
+    height: 4vw;
+    background-color: lightgray;
+    border: 1px solid gray;
+    padding-left: 1vw;
+    padding-right: 2vw;
+    text-align: center;
+    line-height: 4vw;
+}
+
+div#change-sound-length:hover, div#change-sample-rate:hover {
+    border: 1px solid green;
+    background-color: lightgreen;
+    cursor: pointer;
 }
 
 section#edit-interface {

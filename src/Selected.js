@@ -10,7 +10,7 @@ class Selected extends SelectingStuffNode {
     onKeyDown(event) {
         event.preventDefault();
         this.detectEscape(event);
-        if (event.key == 'q') {
+        if(event.key == 'q') {
             this.stateMachine.enterState(new Editing(this.stateMachine, this, this.left, this.right));
         }
     }

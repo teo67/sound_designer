@@ -26,6 +26,7 @@ class Editing extends FallbackMode {
             's': 0
         };
         this.functions = [];
+        this.savedSamples = [];
     }
     getPriority(a, key) {
         if(a.startsWith(key)) {
@@ -52,15 +53,21 @@ class Editing extends FallbackMode {
     }
     updateDisplay(realUpdate = false) {
         this.formulaContext.t = 0;
-        // for(let i = this.left; i < this.right; i++) {
-        //     this.formulaContext.s = this.stateMachine.context.samples[i];
-        //     const eval1 = this.eval();
-        //     this.stateMachine.context.displayElementValue(i, eval1);
-        //     if(realUpdate) {
-        //         this.stateMachine.context.setElementValue(i, eval1);
-        //     }
-        //     this.formulaContext.t += 1 / this.stateMachine.context.sampleRate;
-        // }
+        for(let i = this.left; i < this.right; i++) {
+            this.formulaContext.s = this.stateMachine.context.samples[i];
+            this.stateMachine.context.setSampleValue(i, this.eval());
+            this.formulaContext.t += 1 / this.stateMachine.context.sampleRate;
+        }
+        const min = realUpdate ? 0 : Math.floor(this.left/this.stateMachine.context.samplesPerElement);
+        let max = this.stateMachine.context.sampleElements.length;
+        if(realUpdate) {
+            max = Math.min(max, Math.ceil(this.right/this.stateMachine.context.samplesPerElement));
+        }
+        for(let i = min; i < max; i++) {
+            if(this.stateMachine.context.sampleElements[i] !== null) {
+                this.stateMachine.context.updateElementValue(i);
+            }
+        }
     }
     enter() {
         this.label = document.createElement("label");
@@ -81,6 +88,8 @@ class Editing extends FallbackMode {
         this.element.focus();
 
         this.makeFunLibrary();
+
+        this.savedSamples = this.stateMachine.context.samples.slice(this.left, this.right);
     }
     sortFunLibrary(key) {
         if(this.funLibrary == null) {
@@ -144,7 +153,8 @@ class Editing extends FallbackMode {
         this.detectEscape(event);
         if(event.key == 'Enter') {
             this.updateDisplay(true);
-            this.fullFallback();
+            this.stateMachine.enterState(this.fallback, false);
+            this.fallback.fullFallback();
         }
     }
     destroyElements() {
@@ -154,8 +164,8 @@ class Editing extends FallbackMode {
     }
     cancel() {
         this.destroyElements();
-        for(let i = this.left; i < this.right; i++) {
-            this.stateMachine.context.displayElementValue(i, this.stateMachine.context.samples[i]);
+        for(let i = this.left; i < this.right; i++) { // reset to previous state
+            this.stateMachine.context.samples[i] = this.savedSamples[i - this.left];
         }
     }
     succeed() {

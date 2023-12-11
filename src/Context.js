@@ -1,21 +1,21 @@
 const maxSampleElements = 5000;
+const samplesHolder = document.getElementById("samples");
+const scrollview = document.getElementById("scrollview");
+const zoomview = document.getElementById("zoomview");
 
 class Context {
-    constructor(samples, samplesHolder, sampleRate, scrollview, zoomview) {
+    constructor(samples, sampleRate, parent) {
         this.samples = samples;
         this.sampleElements = [];
-        this.samplesHolder = samplesHolder;
         this.sampleRate = sampleRate;
         this.sampleSize = 1;
         this.offset = 0;
         this.docWidth = 0;
         this.docHeight = 0;
-        this.scrollview = scrollview;
-        this.zoomview = zoomview;
         this.scrolling = false;
         this.zooming = false;
         this.samplesPerElement = null;
-        this.parent = null;
+        this.parent = parent;
     }
     onScrollerDown() {
         this.scrolling = true;
@@ -23,7 +23,16 @@ class Context {
     onZoomerDown() {
         this.zooming = true;
     }
-    onMouseUp() {
+    onMouseUp(ev) {
+        if(this.zooming) {
+            const vwOffset = this.getVwOffset(ev, 82.5, 0, 14);
+            zoomview.style.left = `${vwOffset}vw`;
+            this.setScale(100 / ((vwOffset/14) * (this.samples.length - 50) + 50));
+
+            if(this.parent != null) {
+                this.parent.currentState.onScale();
+            }
+        }
         this.scrolling = false;
         this.zooming = false;
     }
@@ -33,22 +42,18 @@ class Context {
     }
     onMouseMove(ev) {
         if(this.scrolling) {
-            const vwOffset = this.getVwOffset(ev, 6, 0, 75);
+            const vwOffset = this.getVwOffset(ev, 6.5, 0, 75);
+            const savedOffset = this.offset;
             this.offset = Math.round(this.samples.length * (vwOffset/75));
             this.reloadOffsetVisuals();
-            this.reloadScrollVisuals();
+            this.reloadScrollVisuals(savedOffset);
             
             if(this.parent != null) {
                 this.parent.currentState.onScroll();
             }
         } else if(this.zooming) {
-            const vwOffset = this.getVwOffset(ev, 81.5, 0, 14);
-            this.zoomview.style.left = `${vwOffset}vw`;
-            this.setScale(100 / ((vwOffset/14) * (this.samples.length - 1) + 1));
-
-            if(this.parent != null) {
-                this.parent.currentState.onScale();
-            }
+            const vwOffset = this.getVwOffset(ev, 82.5, 0, 14);
+            zoomview.style.left = `${vwOffset}vw`;
         }
     }
     onResize() {
@@ -59,27 +64,26 @@ class Context {
         this.docWidth = Math.max( body.scrollWidth, body.offsetWidth, 
             html.clientWidth, html.offsetWidth );
     }
-    initialize() {
-        for(let i = 0; i < this.samples.length; i++) {
-            this.samples[i] = 0.5;
-            
-            // const newElement = document.createElement("div");
-            // newElement.classList.add("sample");
-            // this.samplesHolder.appendChild(newElement);
-
-            // this.displayElementValue(i, this.samples[i]);
+    clearSamplesHolder() {
+        while(samplesHolder.firstChild) {
+            samplesHolder.removeChild(samplesHolder.firstChild);
         }
+    }
+    initialize() {
+        this.clearSamplesHolder();
+        scrollview.style.left = '0';
+        zoomview.style.left = '0';
         this.setScale(this.sampleSize);
         this.onResize();
     }
     setScale(scale) {
         this.sampleSize = scale;
-        this.scrollview.style.width = `${75 * (100 / (this.samples.length * this.sampleSize))}vw`;
+        scrollview.style.width = `${75 * (100 / (this.samples.length * this.sampleSize))}vw`;
+        const savedOffset = this.offset;
         this.reloadOffsetVisuals();
         this.reloadSampleElementRatio();
-        this.reloadScrollVisuals();
+        this.reloadScrollVisuals(savedOffset);
         this.reloadScaleVisuals();
-        console.log(this.samplesHolder.children.length);
     }
     inRange(sampleNum) {
         return Math.max(0, Math.min(this.samples.length - 1, sampleNum));
@@ -87,11 +91,11 @@ class Context {
     reloadSampleElementRatio() {
         const newSamplesPerElement = Math.max(1, 100/(this.sampleSize * maxSampleElements));
         if(newSamplesPerElement != this.samplesPerElement) {
-            while(this.samplesHolder.firstChild) {
-                this.samplesHolder.removeChild(this.samplesHolder.firstChild);
-            }
+            this.clearSamplesHolder();
             for(const element of this.sampleElements) {
-                element.remove();
+                if(element != null) {
+                    element.remove();
+                }
             }
             this.sampleElements = [];
             this.sampleElements.length = Math.ceil(this.samples.length / newSamplesPerElement);
@@ -100,25 +104,43 @@ class Context {
         }
     }
     reloadScaleVisuals() {
-        for(let i = 0; i < this.samplesHolder.children.length; i++) {
-            this.updateElementScaleVisual(this.samplesHolder.children[i], i);
+        for(let i = 0; i < this.sampleElements.length; i++) {
+            if(this.sampleElements[i] != null) {
+                this.updateElementScaleVisual(this.sampleElements[i], i);
+            }
         }
     }
-    reloadScrollVisuals() {
-        // assume only changes in scroll
-        for(let i = Math.floor(this.offset / this.samplesPerElement); 
-            i <= Math.ceil((this.offset + 100/this.sampleSize) / this.samplesPerElement); 
-            i++
-        ) {
-            if(i >= this.sampleElements.length) {
-                break;
-            }
+    reloadScrollVisuals(previousOffset) {
+        const l = val => Math.floor(val/this.samplesPerElement);
+        const r = val => Math.min(Math.ceil(val/this.samplesPerElement), this.sampleElements.length);
+        const L1 = l(this.offset);
+        const R1 = r(this.offset + 100/this.sampleSize);
+        for(let i = L1; i < R1; i++) {
             if(this.sampleElements[i] == null) {
                 this.sampleElements[i] = document.createElement("div");
                 this.sampleElements[i].classList.add("sample");
-                this.samplesHolder.appendChild(this.sampleElements[i]);
+                samplesHolder.appendChild(this.sampleElements[i]);
                 this.updateElementScaleVisual(this.sampleElements[i], i);
                 this.updateElementValue(i);
+            }
+        }
+        // optimization? remove all elements that used to be in view
+        if(previousOffset == this.offset) {
+            return;
+        }
+        let L2;
+        let R2;
+        if(previousOffset < this.offset) {
+            L2 = l(previousOffset);
+            R2 = L1;
+        } else {
+            L2 = R1;
+            R2 = r(previousOffset + 100/this.sampleSize);
+        }
+        for(let i = L2; i < R2; i++) {
+            if(this.sampleElements[i] != null) {
+                this.sampleElements[i].remove();
+                this.sampleElements[i] = null;
             }
         }
     }
@@ -134,14 +156,14 @@ class Context {
     }
     reloadOffsetVisuals() {
         this.offset = Math.min(this.offset, this.samples.length - 100/this.sampleSize);
-        this.scrollview.style.left = `${this.offset/this.samples.length * 75}vw`;
-        this.samplesHolder.style.left = `${-1 * this.offset * this.sampleSize}vw`;
+        scrollview.style.left = `${this.offset/this.samples.length * 75}vw`;
+        samplesHolder.style.left = `${-1 * this.offset * this.sampleSize}vw`;
     }
     displayElementValue(el, val) {
         el.style.height = `${Math.abs(val) * 50}vh`;
         el.style.bottom = `${50 + Math.min(val, 0) * 50}vh`; 
     }
-    setElementValue(i, val) {
+    setSampleValue(i, val) {
         this.samples[i] = val;
     }
     getSampleFactor() {

@@ -3,6 +3,13 @@ const editor = document.getElementById("edit-interface");
 import Parser from "./Parser.js";
 import allFunctions from "./functionLibrary.js";
 
+class Function {
+    constructor(name, element) {
+        this.name = name;
+        this.element = element;
+    }
+}
+
 class Editing extends FallbackMode {
     constructor(stateMachine, fallback, left, right) {
         super(stateMachine, fallback);
@@ -18,13 +25,26 @@ class Editing extends FallbackMode {
             't': 0,
             's': 0
         };
+        this.functions = [];
+    }
+    getPriority(a, key) {
+        if(a.startsWith(key)) {
+            return 1-1/a.length;
+        }
+        if(a.includes(key)) {
+            return 2-1/a.length;
+        }
+        return 2;
     }
     updateFormula() {
         const parser = new Parser(this.element.value);
         try {
             const newForm = parser.parse();
             this.formula = newForm;
-        } catch {}
+        } catch {} finally {
+            const key = parser.lastFun;
+            this.sortFunLibrary((a, b) => this.getPriority(a.name, key) - this.getPriority(b.name, key));
+        }
         this.updateDisplay();
     }
     eval() {
@@ -32,15 +52,15 @@ class Editing extends FallbackMode {
     }
     updateDisplay(realUpdate = false) {
         this.formulaContext.t = 0;
-        for(let i = this.left; i < this.right; i++) {
-            this.formulaContext.s = this.stateMachine.context.samples[i];
-            const eval1 = this.eval();
-            this.stateMachine.context.displayElementValue(i, eval1);
-            if(realUpdate) {
-                this.stateMachine.context.setElementValue(i, eval1);
-            }
-            this.formulaContext.t += 1 / this.stateMachine.context.sampleRate;
-        }
+        // for(let i = this.left; i < this.right; i++) {
+        //     this.formulaContext.s = this.stateMachine.context.samples[i];
+        //     const eval1 = this.eval();
+        //     this.stateMachine.context.displayElementValue(i, eval1);
+        //     if(realUpdate) {
+        //         this.stateMachine.context.setElementValue(i, eval1);
+        //     }
+        //     this.formulaContext.t += 1 / this.stateMachine.context.sampleRate;
+        // }
     }
     enter() {
         this.label = document.createElement("label");
@@ -62,7 +82,20 @@ class Editing extends FallbackMode {
 
         this.makeFunLibrary();
     }
+    sortFunLibrary(key) {
+        if(this.funLibrary == null) {
+            return;
+        }
+        this.functions.sort(key);
+        while(this.funLibrary.firstChild) {
+            this.funLibrary.removeChild(this.funLibrary.firstChild);
+        }
+        for(const item of this.functions) {
+            this.funLibrary.appendChild(item.element);
+        }
+    }
     makeFunLibrary() {
+        this.functions = [];
         this.funLibrary = document.createElement("section");
         this.funLibrary.classList.add("function-library");
 
@@ -97,6 +130,7 @@ class Editing extends FallbackMode {
                 funEl.appendChild(args);
             }
             this.funLibrary.appendChild(funEl);
+            this.functions.push(new Function(fun, funEl));
         }
 
         editor.appendChild(this.funLibrary);

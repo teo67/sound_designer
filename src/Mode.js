@@ -5,5 +5,7 @@ class Mode {
     enter() {}
     succeed() {}
     cancel() {}
+    onScroll() {}
+    onScale() {}
 }
 export default Mode;

@@ -120,12 +120,18 @@ div.sample {
     background-color: grey;
 }
 
-div.sample.selected {
-    background-color: lightblue;
+div.selected {
+    position: absolute;
+    background-color: blue;
+    height: 100vh;
+    opacity: 0.5;
 }
 
-div.sample.really-selected {
-    background-color: blue;
+div.selecting {
+    position: absolute;
+    background-color: lightblue;
+    height: 100vh;
+    opacity: 0.5;
 }
 
 div#but {

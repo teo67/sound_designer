@@ -29,6 +29,7 @@ class Parser {
         this.stored = null;
         this.input = input;
         this.index = 0;
+        this.lastFun = '';
     }
     getTokenType(char) {
         for(const typ of [TokenTypes.Whitespace, TokenTypes.Number, TokenTypes.FuncName, TokenTypes.Operation]) {
@@ -99,6 +100,7 @@ class Parser {
                 return () => flo;
             case TokenTypes.FuncName:
                 const actualFun = allFunctions[token[0]];
+                this.lastFun = token[0];
                 if(actualFun === undefined) {
                     throw `${token[0]} is not defined as a function!`;
                 }

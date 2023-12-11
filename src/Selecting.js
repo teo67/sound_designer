@@ -1,33 +1,24 @@
-import FallbackMode from './FallbackMode.js';
+import SelectingStuffNode from './SelectingStuffNode.js';
 import Selected from './Selected.js';
 
-class Selecting extends FallbackMode {
+class Selecting extends SelectingStuffNode {
     constructor(stateMachine, fallback, cursorTarget) {
-        super(stateMachine, fallback);
+        super(stateMachine, fallback, "selecting");
         this.cursorTarget = cursorTarget;
-        this.previousLeftBound = cursorTarget;
-        this.previousRightBound = cursorTarget;
+        this.left = cursorTarget;
+        this.right = cursorTarget;
     }
-    enter() {}
     onMouseMove(event) {
         const bound = this.stateMachine.context.getSampleFromX(event.clientX);
-        const left = Math.min(this.cursorTarget, bound);
-        const right = Math.max(this.cursorTarget, bound);
-        this.changeClassOfElements(this.previousLeftBound, left, [], ['selected']);
-        this.changeClassOfElements(left, this.previousLeftBound, ['selected'], []);
-        this.changeClassOfElements(this.previousRightBound, right, ['selected'], []);
-        this.changeClassOfElements(right, this.previousRightBound, [], ['selected']);
-        this.previousLeftBound = left;
-        this.previousRightBound = right;
+        this.left = Math.min(this.cursorTarget, bound);
+        this.right = Math.max(this.cursorTarget, bound);
+        this.updateSelectorVisuals(); 
     }
     onClick() {
-        this.stateMachine.enterState(new Selected(this.stateMachine, this, this.previousLeftBound, this.previousRightBound));
+        this.stateMachine.enterState(new Selected(this.stateMachine, this, this.left, this.right));
     }
     onKeyDown(event) {
         this.detectEscape(event);
-    }
-    cancel() {
-        this.changeClassOfElements(this.previousLeftBound, this.previousRightBound, [], ['selected']);
     }
 }
 

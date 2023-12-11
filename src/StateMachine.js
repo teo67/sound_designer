@@ -4,6 +4,7 @@ class StateMachine {
         this.currentState = new None();
         this.currentState.enter();
         this.context = context;
+        context.parent = this;
     }
     enterState(state, cancel = false) {
         if(cancel) {

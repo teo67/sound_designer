@@ -1,17 +1,11 @@
-import FallbackMode from './FallbackMode.js';
+import SelectingStuffNode from './SelectingStuffNode.js';
 import Editing from './Editing.js';
 
-class Selected extends FallbackMode {
+class Selected extends SelectingStuffNode {
     constructor(stateMachine, fallback, left, right) {
-        super(stateMachine, fallback);
+        super(stateMachine, fallback, "selected");
         this.left = left;
         this.right = right;
-    }
-    enter() {
-        this.changeClassOfElements(this.left, this.right, ['really-selected'], []);
-    }
-    cancel() {
-        this.changeClassOfElements(this.left, this.right, [], ['really-selected']);
     }
     onKeyDown(event) {
         event.preventDefault();

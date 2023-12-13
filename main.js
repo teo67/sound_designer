@@ -5,14 +5,11 @@ const samplesHolder = document.getElementById("samples");
 const cursor = document.getElementById("cursor-line");
 const scroller = document.getElementById("scroller");
 const zoomer = document.getElementById("zoomer");
-const changeSampleRate = document.getElementById("change-sample-rate");
 
-const initialSampleRate = 3000;
+const initialSampleRate = 6000;
 const initialDuration = 1;
 
 const stateMachine = new StateMachine(initialSampleRate, initialDuration);
-
-scroller.ondrag = ev => console.log(ev);
 
 samplesHolder.onclick = ev => stateMachine.currentState.onClick(ev);
 cursor.onclick = ev => stateMachine.currentState.onClick(ev);
@@ -28,5 +25,3 @@ addEventListener('resize', ev => stateMachine.context.onResize(ev));
 stateMachine.enterState(new Passive(stateMachine, cursor));
 
 button.onclick = () => stateMachine.playSound();
-
-// changeSampleRate.onclick = () => stateMachine.updateSampleRate(44100, []);

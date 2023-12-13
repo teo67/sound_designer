@@ -6,7 +6,7 @@ const zoomview = document.getElementById("zoomview");
 class Context {
     constructor(samples, sampleRate, parent) {
         this.samples = samples;
-        this.sampleElements = [];
+        this.sampleElements = {};
         this.sampleRate = sampleRate;
         this.sampleSize = 1;
         this.offset = 0;
@@ -92,31 +92,25 @@ class Context {
         const newSamplesPerElement = Math.max(1, 100/(this.sampleSize * maxSampleElements));
         if(newSamplesPerElement != this.samplesPerElement) {
             this.clearSamplesHolder();
-            for(const element of this.sampleElements) {
-                if(element != null) {
-                    element.remove();
-                }
+            for(const element in this.sampleElements) {
+                this.sampleElements[element].remove();
             }
-            this.sampleElements = [];
-            this.sampleElements.length = Math.ceil(this.samples.length / newSamplesPerElement);
-            this.sampleElements.fill(null);
+            this.sampleElements = {};
             this.samplesPerElement = newSamplesPerElement;
         }
     }
     reloadScaleVisuals() {
-        for(let i = 0; i < this.sampleElements.length; i++) {
-            if(this.sampleElements[i] != null) {
-                this.updateElementScaleVisual(this.sampleElements[i], i);
-            }
+        for(const i in this.sampleElements) {
+            this.updateElementScaleVisual(this.sampleElements[i], i);
         }
     }
     reloadScrollVisuals(previousOffset) {
         const l = val => Math.floor(val/this.samplesPerElement);
-        const r = val => Math.min(Math.ceil(val/this.samplesPerElement), this.sampleElements.length);
+        const r = val => Math.ceil(val/this.samplesPerElement);
         const L1 = l(this.offset);
         const R1 = r(this.offset + 100/this.sampleSize);
         for(let i = L1; i < R1; i++) {
-            if(this.sampleElements[i] == null) {
+            if(this.sampleElements[i] == undefined) {
                 this.sampleElements[i] = document.createElement("div");
                 this.sampleElements[i].classList.add("sample");
                 samplesHolder.appendChild(this.sampleElements[i]);
@@ -138,9 +132,9 @@ class Context {
             R2 = r(previousOffset + 100/this.sampleSize);
         }
         for(let i = L2; i < R2; i++) {
-            if(this.sampleElements[i] != null) {
+            if(this.sampleElements[i] != undefined) {
                 this.sampleElements[i].remove();
-                this.sampleElements[i] = null;
+                delete this.sampleElements[i];
             }
         }
     }

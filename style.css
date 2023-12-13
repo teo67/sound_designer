@@ -1,3 +1,46 @@
+section.change-menu {
+    position: absolute;
+    width: 60vw;
+    left: 20vw;
+    top: 25vh;
+    background-color: lightgray;
+    border-radius: 0.5vw;
+    padding: 0.5vw;
+    font-size: 1.5vw;
+    z-index: 10;
+}
+
+p.change-text {
+    display: block;
+    position: relative;
+    color: black;
+}
+
+div.change-submit {
+    margin-top: 1vw;
+    position: relative;
+    border: 1px solid black;
+    display: inline-block;
+    padding: 1vw;
+    border-radius: 0.5vw;
+}
+
+div.change-submit:hover {
+    cursor: pointer;
+    background-color: lightpink;
+}
+
+label {
+    display: inline-block;
+    width: 15vw;
+    text-align: right;
+}
+
+input#change-input, input#change-checkbox {
+    display: inline-block;
+    margin-left: 1vw;
+}
+
 section.function-library {
     position: fixed;
     z-index: 6;
@@ -210,14 +253,7 @@ body {
     display: none;
 }
 
-label {
-    position: absolute;
-    bottom: 1vw;
-    left: 5vw;
-    display: none;
-}
-
-input {
+input#formula {
     position: absolute;
     bottom: 1vw;
     left: 10vw;

@@ -1,6 +1,6 @@
 import FallbackMode from "./FallbackMode.js";
 
-const selectingStuff = document.getElementById("selecting-stuff");
+const selectingStuff = document.getElementById("extra-stuff");
 
 class SelectingStuffNode extends FallbackMode {
     constructor(stateMachine, fallback, classname) {

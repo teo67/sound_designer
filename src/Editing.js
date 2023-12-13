@@ -16,7 +16,6 @@ class Editing extends FallbackMode {
         this.left = left;
         this.right = right;
         this.element = null;
-        this.label = null;
         this.formula = null;
         this.funLibrary = null;
         this.formulaContext = {
@@ -58,27 +57,27 @@ class Editing extends FallbackMode {
             this.stateMachine.context.setSampleValue(i, this.eval());
             this.formulaContext.t += 1 / this.stateMachine.context.sampleRate;
         }
-        const min = realUpdate ? 0 : Math.floor(this.left/this.stateMachine.context.samplesPerElement);
-        let max = this.stateMachine.context.sampleElements.length;
         if(realUpdate) {
-            max = Math.min(max, Math.ceil(this.right/this.stateMachine.context.samplesPerElement));
-        }
-        for(let i = min; i < max; i++) {
-            if(this.stateMachine.context.sampleElements[i] !== null) {
+            for(const i in this.stateMachine.context.sampleElements) {
                 this.stateMachine.context.updateElementValue(i);
+            }
+        } else {
+            const min = Math.floor(this.left/this.stateMachine.context.samplesPerElement);
+            const max = Math.ceil(this.right/this.stateMachine.context.samplesPerElement);
+            for(let i = min; i < max; i++) {
+                if(this.stateMachine.context.sampleElements[i] !== undefined) {
+                    this.stateMachine.context.updateElementValue(i);
+                }
             }
         }
     }
     enter() {
-        this.label = document.createElement("label");
-        this.label.htmlFor = 'formula';
-        this.label.innerText = 'Enter formula:';
         this.element = document.createElement("input");
         this.element.type = "text";
         this.element.name = 'formula';
         this.element.value = 's';
-        
-        editor.appendChild(this.label);
+        this.element.id = 'formula';
+
         editor.appendChild(this.element);
         editor.classList.remove("hidden");
         this.element.addEventListener('keydown', () => this.updateFormula);
@@ -153,12 +152,10 @@ class Editing extends FallbackMode {
         this.detectEscape(event);
         if(event.key == 'Enter') {
             this.updateDisplay(true);
-            this.stateMachine.enterState(this.fallback, false);
-            this.fallback.fullFallback();
+            this.fullFallback(false);
         }
     }
     destroyElements() {
-        this.label.remove();
         this.element.remove();
         this.funLibrary.remove();
     }

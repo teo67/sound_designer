@@ -5,13 +5,13 @@ class FallbackMode extends ContextMode {
         super(stateMachine);
         this.fallback = fallback;
     }
-    enterFallback() {
-        this.stateMachine.enterState(this.fallback, true);
+    enterFallback(cancel = true) {
+        this.stateMachine.enterState(this.fallback, cancel);
     }
-    fullFallback() {
-        this.enterFallback();
+    fullFallback(cancel = true) {
+        this.enterFallback(cancel);
         if(this.fallback instanceof FallbackMode) {
-            this.fallback.fullFallback();
+            this.fallback.fullFallback(true);
         }
     }
     detectEscape(ev) {

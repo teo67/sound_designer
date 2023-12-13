@@ -13,6 +13,28 @@ class StateMachine {
         this.regen([]);
     }
 
+    resample(numSamples, ratio) {
+        const samples = [];
+        let currentSample = 0;
+        let previousResult = 0;
+        for(let i = 0; i < numSamples; i++) {
+            let sum = 0;
+            let num = 0;
+            while(currentSample < (i + 1) * ratio) {
+                sum += this.context.samples[currentSample];
+                currentSample++;
+                num++;
+            }
+            if(num == 0) {
+                samples.push(previousResult);
+            } else {
+                samples.push(sum/num);
+                previousResult = sum/num;
+            }
+        }
+        return samples;
+    }
+
     regen(samples) {
         this.actualContext = new AudioContext({
             sampleRate: this.sampleRate
@@ -24,7 +46,7 @@ class StateMachine {
         );
         const channel = this.actualBuffer.getChannelData(0);
         if(samples.length > channel.length) {
-            throw "Too many samples!"
+            throw `Too many samples! (${samples.length})`;
         }
         for(let i = 0; i < samples.length; i++) {
             channel[i] = samples[i];

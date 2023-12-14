@@ -1,24 +1,26 @@
+import Function from "./Function.js";
 class Argument {
     constructor(name, description) {
         this.name = name;
         this.description = description;
     }
 }
-class Function {
-    constructor(description, args, fun) {
-        this.description = description;
-        this.args = args;
-        this.fun = fun;
-    }
-    makeCallTo(args) {
-        return context => this.fun(context, ...args.map(arg => arg(context)));
-    }
-}
 const allFunctions = {
     "y": new Function("Get the y value of the mouse, ranging from -1 to 1.", [], context => context.y),
     "x": new Function("Get the x value of the mouse, ranging from -1 to 1.", [], context => context.x),
     "t": new Function("Get the time within the sample, in seconds.", [], context => context.t),
-    "s": new Function("Get the current value of the sample, from -1 to 1.", [], context => context.s),
+    "T": new Function("Get the starting time of the selected region, in seconds.", [], context => context.T),
+    "n": new Function("Get the current sample index.", [], context => context.n),
+    "N": new Function("Get the starting sample index of the selected region.", [], context => context.N),
+    "s": new Function("Get the current value of the sample, from -1 to 1. If an argument is specified, get the value of that sample instead.", [
+        new Argument("index", "The index of the sample to get.")
+    ], (context, i = context.n) => {
+        const _i = Math.max(0, Math.min(context.current_s.length, Math.round(i)));
+        if(_i < context.N || _i >= context.N + context.saved_s.length) {
+            return context.current_s[_i];
+        }
+        return context.saved_s[_i - context.N];
+    }),
     "abs": new Function("Get the absolute value of any number.", [
         new Argument("input", "A number")
     ], (_, input = 0) => Math.abs(input)),

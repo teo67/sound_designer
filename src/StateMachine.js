@@ -1,19 +1,37 @@
 import None from './None.js';
 import Context from './Context.js';
+import constants from './constants.js';
 
 class StateMachine {
     constructor(sampleRate, duration) {
         this.currentState = new None();
         this.currentState.enter();
-        this.sampleRate = sampleRate;
-        this.duration = duration;
+        this.sampleRate = Math.round(sampleRate);
+        this.duration = Math.floor(duration * this.sampleRate) / this.sampleRate;
+        if(!this.verifyRateAndDuration(this.sampleRate, this.duration, this.sampleRate*this.duration)) {
+            throw "Invalid initial conditions!";
+        }
         this.context = null;
         this.actualContext = null;
         this.actualBuffer = null;
+        this.bindings = {};
         this.regen([]);
     }
 
-    resample(numSamples, ratio) {
+    verifyRateAndDuration(sampleRate, duration, frames) {
+        if(sampleRate < constants.minSampleRate || sampleRate > constants.maxSampleRate) {
+            return false;
+        }
+        if(duration < constants.minDuration || duration > constants.maxDuration) {
+            return false;
+        }
+        if(frames < 1) {
+            return false;
+        }
+        return true;
+    }
+
+    resample(numSamples, ratio, _samples) {
         const samples = [];
         let currentSample = 0;
         let previousResult = 0;
@@ -21,7 +39,7 @@ class StateMachine {
             let sum = 0;
             let num = 0;
             while(currentSample < (i + 1) * ratio) {
-                sum += this.context.samples[currentSample];
+                sum += currentSample >= _samples.length ? 0 : _samples[currentSample];
                 currentSample++;
                 num++;
             }

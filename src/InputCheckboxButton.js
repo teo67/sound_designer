@@ -1,52 +1,48 @@
 import FallbackMode from "./FallbackMode.js";
 const extraStuff = document.getElementById("extra-stuff");
 
+const uniquePrefix = "abc";
+
 class InputCheckboxButton extends FallbackMode {
-    constructor(stateMachine, fallback, options = {
-        text, inputLabel, defaultValue, minInput, maxInput, checkboxLabel
-    }) {
+    constructor(stateMachine, fallback, text) {
         super(stateMachine, fallback);
-        this.options = options;
+        this.text = text;
         this.el = null;
-        this.inputElement = null;
-        this.checkboxElement = null;
         this.submit = null;
+        this.counter = 0;
     }
 
-    makeLabelAndInput(labelName, inputType, defaultValue, parent, htmlFor) {
+    makeLabelAndInput(labelName, inputType, defaultValue) {
         const label = document.createElement("label");
-        label.htmlFor = htmlFor;
+        label.htmlFor = uniquePrefix + `${this.counter}`;
         label.innerText = labelName;
+        label.classList.add("input-checkbox");
         const inputElement = document.createElement("input");
         inputElement.type = inputType;
-        inputElement.name = htmlFor;
-        inputElement.id = htmlFor;
+        inputElement.name = uniquePrefix + `${this.counter}`;
+        inputElement.id = uniquePrefix + `${this.counter}`;
         inputElement.value = defaultValue;
-        parent.appendChild(label);
-        parent.appendChild(inputElement);
+        inputElement.classList.add("input-checkbox");
+        this.el.appendChild(label);
+        this.el.appendChild(inputElement);
+        this.el.appendChild(document.createElement("br"));
+        this.counter++;
         return inputElement;
     }
 
-    enter() {
-        this.el = document.createElement("section");
-        this.el.classList.add("change-menu");
-        const text = document.createElement("p");
-        text.classList.add("change-text");
-        text.innerText = this.options.text;
-        this.el.appendChild(text);
+    addComponents() {}
 
-        this.inputElement = this.makeLabelAndInput(
-            this.options.inputLabel, 'number', this.options.defaultValue, this.el, 'change-input'
-        );
-        this.inputElement.max = this.options.maxInput;
-        this.inputElement.min = this.options.minInput;
-        this.el.appendChild(document.createElement("br"));
-        this.checkboxElement = this.makeLabelAndInput(
-            this.options.checkboxLabel, 'checkbox', '', this.el, 'change-checkbox'
-        );
-        this.el.appendChild(document.createElement("br"));
+    enter() {
+        this.counter = 0;
+        this.el = document.createElement("section");
+        this.el.classList.add("input-checkbox");
+        const text = document.createElement("p");
+        text.classList.add("input-checkbox");
+        text.innerText = this.text;
+        this.el.appendChild(text);
+        this.addComponents();
         this.submit = document.createElement("div");
-        this.submit.classList.add("change-submit");
+        this.submit.classList.add("input-checkbox");
         this.submit.innerText = 'submit (enter)';
         this.el.appendChild(this.submit);
 
@@ -55,29 +51,27 @@ class InputCheckboxButton extends FallbackMode {
         this.submit.onclick = () => this.trySubmit();
     }
 
-    onSubmit() {}
+    async onSubmit() {
+        return true;
+    }
 
-    trySubmit() {
-        if(this.inputElement.value > this.options.maxInput) {
-            this.ssubmit.innerText = `max input is ${this.options.maxInput}!`;
-        } else if(this.inputElement.value < this.options.minInput) {
-            this.submit.innerText = `min input is ${this.options.minInput}!`;
-        } else {
-            this.onSubmit();
-            this.fullFallback(false);
-            return;
-        }
+    displayError(text) {
+        this.submit.innerText = text;
         setTimeout(() => {
             this.submit.innerText = 'submit (enter)';
         }, 1000);
     }
 
+    async trySubmit() {
+        if(await this.onSubmit()) {
+            this.fullFallback(false);
+        } else {
+            this.displayError("invalid arguments!");
+        }
+    }
+
     destroyElements() {
-        this.inputElement.remove();
-        this.checkboxElement.remove();
-        this.submit.remove();
         this.el.remove();
-        this.el = null;
     }
 
     onKeyDown(ev) {

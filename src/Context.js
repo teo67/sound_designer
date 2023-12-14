@@ -77,7 +77,7 @@ class Context {
         this.onResize();
     }
     setScale(scale) {
-        this.sampleSize = scale;
+        this.sampleSize = Math.max(scale, 100/this.samples.length);
         scrollview.style.width = `${75 * (100 / (this.samples.length * this.sampleSize))}vw`;
         const savedOffset = this.offset;
         this.reloadOffsetVisuals();
@@ -167,7 +167,7 @@ class Context {
         return (sam - this.offset) / this.getSampleFactor();
     }
     getSampleFromX(x) {
-        return Math.floor(x * this.getSampleFactor() + this.offset);
+        return Math.round(x * this.getSampleFactor() + this.offset);
     }
 }
 

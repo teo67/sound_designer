@@ -18,12 +18,7 @@ class Editing extends FallbackMode {
         this.element = null;
         this.formula = null;
         this.funLibrary = null;
-        this.formulaContext = {
-            'x': 0,
-            'y': 0,
-            't': 0,
-            's': 0
-        };
+        this.formulaContext = {};
         this.functions = [];
         this.savedSamples = [];
     }
@@ -39,7 +34,7 @@ class Editing extends FallbackMode {
     updateFormula() {
         const parser = new Parser(this.element.value);
         try {
-            const newForm = parser.parse();
+            const newForm = parser.parse(this.stateMachine.bindings);
             this.formula = newForm;
         } catch {} finally {
             const key = parser.lastFun;
@@ -51,11 +46,12 @@ class Editing extends FallbackMode {
         return Math.min(1, Math.max(-1, this.formula(this.formulaContext)));
     }
     updateDisplay(realUpdate = false) {
-        this.formulaContext.t = 0;
+        this.formulaContext.t = this.formulaContext.T;
+        this.formulaContext.n = this.formulaContext.N;
         for(let i = this.left; i < this.right; i++) {
-            this.formulaContext.s = this.stateMachine.context.samples[i];
             this.stateMachine.context.setSampleValue(i, this.eval());
-            this.formulaContext.t += 1 / this.stateMachine.context.sampleRate;
+            this.formulaContext.t += 1 / this.stateMachine.sampleRate;
+            this.formulaContext.n++;
         }
         if(realUpdate) {
             for(const i in this.stateMachine.context.sampleElements) {
@@ -77,6 +73,18 @@ class Editing extends FallbackMode {
         this.element.name = 'formula';
         this.element.value = 's';
         this.element.id = 'formula';
+        this.savedSamples = this.stateMachine.context.samples.slice(this.left, this.right);
+        
+        this.formulaContext = {
+            'x': 0,
+            'y': 0,
+            't': 0,
+            'T': this.left / this.stateMachine.sampleRate,
+            'current_s': this.stateMachine.context.samples,
+            'saved_s': this.savedSamples,
+            'n': 0,
+            'N': this.left
+        };
 
         editor.appendChild(this.element);
         editor.classList.remove("hidden");
@@ -86,9 +94,7 @@ class Editing extends FallbackMode {
         this.updateFormula();
         this.element.focus();
 
-        this.makeFunLibrary();
-
-        this.savedSamples = this.stateMachine.context.samples.slice(this.left, this.right);
+        this.makeFunLibrary();  
     }
     sortFunLibrary(key) {
         if(this.funLibrary == null) {
@@ -163,6 +169,9 @@ class Editing extends FallbackMode {
         this.destroyElements();
         for(let i = this.left; i < this.right; i++) { // reset to previous state
             this.stateMachine.context.samples[i] = this.savedSamples[i - this.left];
+        }
+        for(const i in this.stateMachine.context.sampleElements) {
+            this.stateMachine.context.updateElementValue(i);
         }
     }
     succeed() {

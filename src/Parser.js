@@ -1,7 +1,6 @@
 import allFunctions from "./functionLibrary.js";
-let letters = 'abcdefghijklmnopqrstuvwxyz';
-letters += letters.toUpperCase();
-letters += '_';
+import constants from "./constants.js";
+import Function from "./Function.js";
 const TokenTypes = {
     Whitespace: 0,
     Number: 1,
@@ -21,7 +20,7 @@ const operators = {
 const isValid = {};
 isValid[TokenTypes.Whitespace] = char => ' \t\n\xa0'.includes(char);
 isValid[TokenTypes.Number] = (char, current) => '0123456789'.includes(char) || (char == '.' && !current.includes('.'));
-isValid[TokenTypes.FuncName] = char => letters.includes(char);
+isValid[TokenTypes.FuncName] = char => constants.letters.includes(char);
 isValid[TokenTypes.Operation] = char => operators[char] !== undefined;
 isValid[TokenTypes.Parens] = () => false;
 class Parser {
@@ -73,11 +72,11 @@ class Parser {
     doneWithInput() {
         return this.index >= this.input.length;
     }
-    parse() {
+    parse(bindings) {
         return this.parseOperationSet(['+', '-'], 
             () => this.parseOperationSet(['*', '/', '%'], 
                 () => this.parseOperationSet(['**'], 
-                    () => this.parseLowest())));
+                    () => this.parseLowest(bindings))));
     }
     parseOperationSet(operations, innerFun) {
         let fun = innerFun();
@@ -92,17 +91,27 @@ class Parser {
         this.stored = nextToken;
         return fun;
     }
-    parseLowest() {
+    parseLowest(bindings) {
         const token = this.nextToken();
         switch(token[1]) {
             case TokenTypes.Number:
                 const flo = Number.parseFloat(token[0]);
                 return () => flo;
             case TokenTypes.FuncName:
-                const actualFun = allFunctions[token[0]];
+                let actualFun = allFunctions[token[0]];
                 this.lastFun = token[0];
                 if(actualFun === undefined) {
-                    throw `${token[0]} is not defined as a function!`;
+                    const binding = bindings[token[0]];
+                    if(binding === undefined) {
+                        throw `${token[0]} is not defined as a function!`;
+                    }
+                    actualFun = new Function("", [], (context, i = context.n - context.N) => {
+                        const _i = Math.max(0, Math.min(context.current_s.length, Math.round(i)));
+                        if(_i < 0 || _i >= binding.length) {
+                            return 0;
+                        }
+                        return binding[_i];
+                    });
                 }
                 const nextToken = this.nextToken();
                 if(nextToken[1] == TokenTypes.Parens && nextToken[0] == '(') {
@@ -110,16 +119,16 @@ class Parser {
                     let findClosingParens = this.nextToken();
                     while(findClosingParens[1] != TokenTypes.Parens || findClosingParens[0] != ')') {
                         this.stored = findClosingParens;
-                        args.push(this.parse());
+                        args.push(this.parse(bindings));
                         findClosingParens = this.nextToken();
                     }
-                    return actualFun.makeCallTo(args); // TODO: implement functions
+                    return actualFun.makeCallTo(args); 
                 }
                 this.stored = nextToken;
-                return actualFun.makeCallTo([]); // TODO: function with no arguments
+                return actualFun.makeCallTo([]); 
             case TokenTypes.Parens:
                 if(token[0] == '(') {
-                    const body = this.parse();
+                    const body = this.parse(bindings);
                     const endParen = this.nextToken();
                     if(endParen[1] != TokenTypes.Parens || endParen[0] != ')') {
                         throw `Expecting closing parentheses, received ${endParen[0]}!`;

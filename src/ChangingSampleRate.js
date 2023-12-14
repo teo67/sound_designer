@@ -1,26 +1,34 @@
 import InputCheckboxButton from "./InputCheckboxButton.js";
+import constants from "./constants.js";
 
 class ChangingSampleRate extends InputCheckboxButton {
     constructor(stateMachine, fallback) {
-        super(stateMachine, fallback, {
-            text: "change sample rate",
-            inputLabel: "rate (hz)",
-            defaultValue: 3000,
-            minInput: 3000,
-            maxInput: 96000,
-            checkboxLabel: "resample"
-        });
+        super(stateMachine, fallback, "change sample rate");
+        this.sampleRate = null;
+        this.resample = null;
+    }
+
+    addComponents() {
+        this.sampleRate = this.makeLabelAndInput("rate (1/s)", "number", this.stateMachine.sampleRate);
+        this.sampleRate.min = constants.minSampleRate;
+        this.sampleRate.max = constants.maxSampleRate;
+        this.resample = this.makeLabelAndInput("resample", "checkbox", "");
     }
 
     onSubmit() {
         let samples = this.stateMachine.context.samples;
-        const requestedRate = this.inputElement.value;
-        const numSamples = this.stateMachine.duration * requestedRate;
-        if(this.checkboxElement.checked) { // resample
+        const requestedRate = Math.round(this.sampleRate.value);
+        const numSamples = Math.floor(this.stateMachine.duration * requestedRate);
+        if(!this.stateMachine.verifyRateAndDuration(requestedRate, numSamples/requestedRate, numSamples)) {
+            return false;
+        }
+        this.stateMachine.duration = numSamples / requestedRate;
+        if(this.resample.checked) { // resample
             const currentRate = this.stateMachine.sampleRate;
-            samples = this.stateMachine.resample(numSamples, currentRate/requestedRate);
+            samples = this.stateMachine.resample(numSamples, currentRate/requestedRate, samples);
         }
         this.stateMachine.updateSampleRate(requestedRate, samples.slice(0, Math.min(samples.length, numSamples)));
+        return true;
     }
 }
 

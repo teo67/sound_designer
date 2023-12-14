@@ -1,4 +1,4 @@
-section.change-menu {
+section.input-checkbox {
     position: absolute;
     width: 60vw;
     left: 20vw;
@@ -10,13 +10,13 @@ section.change-menu {
     z-index: 10;
 }
 
-p.change-text {
+p.input-checkbox {
     display: block;
     position: relative;
     color: black;
 }
 
-div.change-submit {
+div.input-checkbox {
     margin-top: 1vw;
     position: relative;
     border: 1px solid black;
@@ -25,18 +25,18 @@ div.change-submit {
     border-radius: 0.5vw;
 }
 
-div.change-submit:hover {
+div.input-checkbox:hover {
     cursor: pointer;
     background-color: lightpink;
 }
 
-label {
+label.input-checkbox {
     display: inline-block;
     width: 15vw;
     text-align: right;
 }
 
-input#change-input, input#change-checkbox {
+input.input-checkbox {
     display: inline-block;
     margin-left: 1vw;
 }
@@ -205,7 +205,7 @@ div#but:hover {
     cursor: pointer;
 }
 
-div#change-sound-length, div#change-sample-rate {
+div#change-sound-length, div#change-sample-rate, div#import {
     display: inline-block;
     height: 4vw;
     background-color: lightgray;
@@ -216,7 +216,7 @@ div#change-sound-length, div#change-sample-rate {
     line-height: 4vw;
 }
 
-div#change-sound-length:hover, div#change-sample-rate:hover {
+div#change-sound-length:hover, div#change-sample-rate:hover, div#import:hover {
     border: 1px solid green;
     background-color: lightgreen;
     cursor: pointer;

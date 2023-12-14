@@ -1,12 +1,13 @@
 import StateMachine from './src/StateMachine.js';
 import Passive from './src/Passive.js';
+import constants from './src/constants.js';
 const button = document.getElementById("but");
 const samplesHolder = document.getElementById("samples");
 const cursor = document.getElementById("cursor-line");
 const scroller = document.getElementById("scroller");
 const zoomer = document.getElementById("zoomer");
 
-const initialSampleRate = 6000;
+const initialSampleRate = constants.minSampleRate;
 const initialDuration = 1;
 
 const stateMachine = new StateMachine(initialSampleRate, initialDuration);

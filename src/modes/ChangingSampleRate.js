@@ -1,5 +1,5 @@
-import InputCheckboxButton from "./InputCheckboxButton.js";
-import constants from "./constants.js";
+import InputCheckboxButton from "../classes/InputCheckboxButton.js";
+import constants from "../util/constants.js";
 
 class ChangingSampleRate extends InputCheckboxButton {
     constructor(stateMachine, fallback) {
@@ -20,6 +20,7 @@ class ChangingSampleRate extends InputCheckboxButton {
         const requestedRate = Math.round(this.sampleRate.value);
         const numSamples = Math.floor(this.stateMachine.duration * requestedRate);
         if(!this.stateMachine.verifyRateAndDuration(requestedRate, numSamples/requestedRate, numSamples)) {
+            this.displayError("invalid sample rate and/or duration!");
             return false;
         }
         this.stateMachine.duration = numSamples / requestedRate;

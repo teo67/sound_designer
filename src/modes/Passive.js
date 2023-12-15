@@ -1,4 +1,4 @@
-import ContextMode from './ContextMode.js';
+import ContextMode from '../classes/ContextMode.js';
 import Selecting from './Selecting.js';
 import Selected from './Selected.js';
 import ChangingSampleRate from './ChangingSampleRate.js';
@@ -20,6 +20,11 @@ class Passive extends ContextMode {
         changeSampleRate.onclick = () => this.enterSampleRate();
         changeSoundLength.onclick = () => this.enterSoundLength();
         importButton.onclick = () => this.enterImport();
+        for(const button of buttons) {
+            if(button.classList.contains('disabled')) {
+                button.classList.remove('disabled');
+            }
+        }
     }
     enterSoundLength() {
         this.stateMachine.enterState(new ChangingSoundLength(this.stateMachine, this));
@@ -33,6 +38,7 @@ class Passive extends ContextMode {
     succeed() {
         for(const button of buttons) {
             button.onclick = () => {};
+            button.classList.add('disabled');
         }
     }
     cancel() {
@@ -48,6 +54,7 @@ class Passive extends ContextMode {
     }
     onKeyDown(event) {
         if(event.key == 'a') { // select all
+            this.stateMachine.context.setScale(14, 100/this.stateMachine.context.samples.length);
             this.stateMachine.enterState(new Selected(this.stateMachine, this, 0, this.stateMachine.context.samples.length));
         } else if(event.key == 'r') {
             this.enterSampleRate();

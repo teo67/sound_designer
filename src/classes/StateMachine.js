@@ -1,6 +1,6 @@
-import None from './None.js';
+import None from '../modes/None.js';
 import Context from './Context.js';
-import constants from './constants.js';
+import constants from '../util/constants.js';
 
 class StateMachine {
     constructor(sampleRate, duration) {
@@ -83,11 +83,11 @@ class StateMachine {
         this.regen(samples);
     }
 
-    playSound() {
+    playSound(start = undefined, duration = undefined) {
         const source = this.actualContext.createBufferSource();
         source.buffer = this.actualBuffer;
         source.connect(this.actualContext.destination);
-        source.start();
+        source.start(0, start, duration);
     }
 
     enterState(state, cancel = false) {

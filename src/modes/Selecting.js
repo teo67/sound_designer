@@ -1,4 +1,4 @@
-import SelectingStuffNode from './SelectingStuffNode.js';
+import SelectingStuffNode from '../classes/SelectingStuffNode.js';
 import Selected from './Selected.js';
 
 class Selecting extends SelectingStuffNode {
@@ -19,6 +19,10 @@ class Selecting extends SelectingStuffNode {
     }
     onKeyDown(event) {
         this.detectEscape(event);
+        if(event.key == " ") {
+            const start = this.left/this.stateMachine.sampleRate;
+            this.stateMachine.playSound(start);
+        }
     }
 }
 

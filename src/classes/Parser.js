@@ -1,14 +1,12 @@
-import allFunctions from "./functionLibrary.js";
-import constants from "./constants.js";
+import allFunctions from "../util/functionLibrary.js";
+import constants from "../util/constants.js";
 import Function from "./Function.js";
-const TokenTypes = {
-    Whitespace: 0,
-    Number: 1,
-    FuncName: 2,
-    Operation: 3,
-    Parens: 4,
-    EndOfFile: 5
-};
+import makeSamplingFunction from "../util/makeSamplingFunction.js";
+let letters = 'abcdefghijklmnopqrstuvwxyz';
+letters += letters.toUpperCase();
+letters += '_#@$';
+const numbers = '0123456789';
+const TokenTypes = constants.TokenTypes;
 const operators = {
     "+": (a, b) => a + b,
     "-": (a, b) => a - b,
@@ -19,8 +17,8 @@ const operators = {
 };
 const isValid = {};
 isValid[TokenTypes.Whitespace] = char => ' \t\n\xa0'.includes(char);
-isValid[TokenTypes.Number] = (char, current) => '0123456789'.includes(char) || (char == '.' && !current.includes('.'));
-isValid[TokenTypes.FuncName] = char => constants.letters.includes(char);
+isValid[TokenTypes.Number] = (char, current) => numbers.includes(char) || (char == '.' && !current.includes('.'));
+isValid[TokenTypes.FuncName] = char => letters.includes(char) || numbers.includes(char);
 isValid[TokenTypes.Operation] = char => operators[char] !== undefined;
 isValid[TokenTypes.Parens] = () => false;
 class Parser {
@@ -31,13 +29,16 @@ class Parser {
         this.lastFun = '';
     }
     getTokenType(char) {
-        for(const typ of [TokenTypes.Whitespace, TokenTypes.Number, TokenTypes.FuncName, TokenTypes.Operation]) {
+        for(const typ of [TokenTypes.Whitespace, TokenTypes.Number, TokenTypes.Operation]) {
             if(isValid[typ](char, '')) {
                 return typ;
             }
         }
         if(char == '(' || char == ')') {
             return TokenTypes.Parens;
+        }
+        if(letters.includes(char)) {
+            return TokenTypes.FuncName;
         }
         throw `Invalid character: ${char}`;
     }
@@ -105,13 +106,7 @@ class Parser {
                     if(binding === undefined) {
                         throw `${token[0]} is not defined as a function!`;
                     }
-                    actualFun = new Function("", [], (context, i = context.n - context.N) => {
-                        const _i = Math.max(0, Math.min(context.current_s.length, Math.round(i)));
-                        if(_i < 0 || _i >= binding.length) {
-                            return 0;
-                        }
-                        return binding[_i];
-                    });
+                    actualFun = new Function("", [], makeSamplingFunction(binding));
                 }
                 const nextToken = this.nextToken();
                 if(nextToken[1] == TokenTypes.Parens && nextToken[0] == '(') {

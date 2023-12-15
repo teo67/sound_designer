@@ -1,7 +1,8 @@
-import FallbackMode from "./FallbackMode.js";
+import FallbackMode from "../classes/FallbackMode.js";
+import Parser from "../classes/Parser.js";
+import allFunctions from "../util/functionLibrary.js";
 const editor = document.getElementById("edit-interface");
-import Parser from "./Parser.js";
-import allFunctions from "./functionLibrary.js";
+const controlsBottom = document.getElementById("controls-bottom");
 
 class Function {
     constructor(name, element) {
@@ -18,9 +19,13 @@ class Editing extends FallbackMode {
         this.element = null;
         this.formula = null;
         this.funLibrary = null;
+        this.bindingsElement = null;
+        this.toggleLibraries = null;
         this.formulaContext = {};
         this.functions = [];
+        this.bindings = [];
         this.savedSamples = [];
+        this.showing = false;
     }
     getPriority(a, key) {
         if(a.startsWith(key)) {
@@ -38,7 +43,9 @@ class Editing extends FallbackMode {
             this.formula = newForm;
         } catch {} finally {
             const key = parser.lastFun;
-            this.sortFunLibrary((a, b) => this.getPriority(a.name, key) - this.getPriority(b.name, key));
+            const keyFun = (a, b) => this.getPriority(a.name, key) - this.getPriority(b.name, key);
+            this.sortLibrary(keyFun, this.functions, this.funLibrary);
+            this.sortLibrary(keyFun, this.bindings, this.bindingsElement);
         }
         this.updateDisplay();
     }
@@ -68,6 +75,8 @@ class Editing extends FallbackMode {
         }
     }
     enter() {
+        controlsBottom.classList.add("hidden");
+
         this.element = document.createElement("input");
         this.element.type = "text";
         this.element.name = 'formula';
@@ -95,24 +104,86 @@ class Editing extends FallbackMode {
         this.element.focus();
 
         this.makeFunLibrary();  
+        this.makeBindingsLibrary();
+        this.toggleLibraries = document.createElement("div");
+        this.toggleLibraries.classList.add("toggle-libraries");
+        this.toggleLibraries.innerText = "show libraries";
+        this.showing = false;
+        this.toggleLibraries.onclick = () => {
+            this.showing = !this.showing;
+            this.toggleLibraries.innerText = this.showing ? "hide libraries" : "show libraries";
+            if(this.showing) {
+                this.show(this.funLibrary);
+                this.show(this.bindingsElement);
+            } else {
+                this.hide(this.funLibrary);
+                this.hide(this.bindingsElement);
+            }
+        }
+        editor.appendChild(this.toggleLibraries);
     }
-    sortFunLibrary(key) {
-        if(this.funLibrary == null) {
+    hide(el) {
+        if(el != null) {
+            el.classList.add("hidden");
+        }
+    }
+    show(el) {
+        if(el != null && el.classList.contains("hidden")) {
+            el.classList.remove("hidden");
+        }
+    }
+    sortLibrary(key, arr, element) {
+        if(element == null) {
             return;
         }
-        this.functions.sort(key);
-        while(this.funLibrary.firstChild) {
-            this.funLibrary.removeChild(this.funLibrary.firstChild);
+        arr.sort(key);
+        while(element.firstChild) {
+            element.removeChild(element.firstChild);
         }
-        for(const item of this.functions) {
-            this.funLibrary.appendChild(item.element);
+        for(const item of arr) {
+            element.appendChild(item.element);
         }
+    }
+    noMoreBindings() {
+        return Object.keys(this.stateMachine.bindings).length == 0;
+    }
+    makeBindingsLibrary() {
+        this.bindings = [];
+        if(this.noMoreBindings()) {
+            return;
+        }
+        this.bindingsElement = document.createElement("section");
+        this.bindingsElement.classList.add("binding-library");
+        this.bindingsElement.classList.add("hidden");
+        for(const binding in this.stateMachine.bindings) {
+            const bindingEl = document.createElement("div");
+            bindingEl.classList.add("binding");
+            const title = document.createElement("p");
+            title.classList.add("title");
+            title.innerText = binding;
+            bindingEl.appendChild(title);
+            const remove = document.createElement("div");
+            remove.innerText = "remove";
+            remove.classList.add("remove-binding");
+            remove.onclick = () => {
+                delete this.stateMachine.bindings[binding];
+                this.bindingsElement.removeChild(bindingEl);
+                bindingEl.remove();
+                if(this.noMoreBindings()) {
+                    this.bindingsElement.remove();
+                }
+            };
+            bindingEl.appendChild(remove);
+            this.bindingsElement.appendChild(bindingEl);
+            this.bindings.push(new Function(binding, bindingEl));
+        }
+        editor.appendChild(this.bindingsElement);
     }
     makeFunLibrary() {
         this.functions = [];
         this.funLibrary = document.createElement("section");
         this.funLibrary.classList.add("function-library");
-
+        this.funLibrary.classList.add("hidden");
         for(const fun in allFunctions) {
             const funEl = document.createElement("div");
             funEl.classList.add("function");
@@ -159,11 +230,22 @@ class Editing extends FallbackMode {
         if(event.key == 'Enter') {
             this.updateDisplay(true);
             this.fullFallback(false);
+        } else if(event.key == ' ') {
+            const start = this.left/this.stateMachine.sampleRate;
+            const end = this.right/this.stateMachine.sampleRate;
+            this.stateMachine.playSound(start, end - start);
         }
     }
     destroyElements() {
         this.element.remove();
-        this.funLibrary.remove();
+        if(this.funLibrary != null) {
+            this.funLibrary.remove();
+        }
+        if(this.bindingsElement != null) {
+            this.bindingsElement.remove();
+        }
+        this.toggleLibraries.remove();
+        controlsBottom.classList.remove("hidden");
     }
     cancel() {
         this.destroyElements();

@@ -20,14 +20,18 @@
                     <div id="zoomview"></div>
                 </div>
             </section>
-            <section id="samples"></section>
-            <div id="cursor-line"></div>
+            <section id="selectable">
+                <section id="selecting-stuff"></section>
+                <section id="samples"></section>
+                <div id="cursor-line"></div>
+            </section>
             <section id="edit-interface" class="hidden"></section>
             <section id="extra-stuff"></section>
             <section id="controls-bottom">
-                <div id="change-sound-length">change sound length (l)</div>
-                <div id="change-sample-rate">change sample rate (r)</div>
-                <div id="import">import sound (i)</div>
+                <div id="change-sound-length" class="bottom-button disabled">change sound length (l)</div>
+                <div id="change-sample-rate" class="bottom-button disabled">change sample rate (r)</div>
+                <div id="import" class="bottom-button disabled">import sound (i)</div>
+                <div id="copy" class="bottom-button disabled">copy to binding <input type="text" value="c" id="copy-input"></input> (c)</div>
             </section>
         </main>
         <footer>

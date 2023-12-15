@@ -1,4 +1,4 @@
-const maxSampleElements = 5000;
+const maxSampleElements = 2500;
 const samplesHolder = document.getElementById("samples");
 const scrollview = document.getElementById("scrollview");
 const zoomview = document.getElementById("zoomview");
@@ -8,7 +8,7 @@ class Context {
         this.samples = samples;
         this.sampleElements = {};
         this.sampleRate = sampleRate;
-        this.sampleSize = 1;
+        this.sampleSize = 2;
         this.offset = 0;
         this.docWidth = 0;
         this.docHeight = 0;
@@ -26,8 +26,7 @@ class Context {
     onMouseUp(ev) {
         if(this.zooming) {
             const vwOffset = this.getVwOffset(ev, 82.5, 0, 14);
-            zoomview.style.left = `${vwOffset}vw`;
-            this.setScale(100 / ((vwOffset/14) * (this.samples.length - 50) + 50));
+            this.setScale(vwOffset, 100 / ((vwOffset/14) * (this.samples.length - 50) + 50));
 
             if(this.parent != null) {
                 this.parent.currentState.onScale();
@@ -73,10 +72,11 @@ class Context {
         this.clearSamplesHolder();
         scrollview.style.left = '0';
         zoomview.style.left = '0';
-        this.setScale(this.sampleSize);
+        this.setScale(0, this.sampleSize);
         this.onResize();
     }
-    setScale(scale) {
+    setScale(vwOffset, scale) {
+        zoomview.style.left = `${vwOffset}vw`;
         this.sampleSize = Math.max(scale, 100/this.samples.length);
         scrollview.style.width = `${75 * (100 / (this.samples.length * this.sampleSize))}vw`;
         const savedOffset = this.offset;
@@ -154,7 +154,9 @@ class Context {
         samplesHolder.style.left = `${-1 * this.offset * this.sampleSize}vw`;
     }
     displayElementValue(el, val) {
-        el.style.height = `${Math.abs(val) * 50}vh`;
+        const abs = Math.abs(val);
+        el.style.height = `${abs * 50}vh`;
+        el.style.backgroundColor = `rgb(${(1 - abs) * 170 + abs * 255}, ${118}, ${(1 - abs) * 255 + abs * 247})`;
         el.style.bottom = `${50 + Math.min(val, 0) * 50}vh`; 
     }
     setSampleValue(i, val) {

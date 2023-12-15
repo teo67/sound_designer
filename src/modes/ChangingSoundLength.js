@@ -1,4 +1,4 @@
-import InputCheckboxButton from "./InputCheckboxButton.js";
+import InputCheckboxButton from "../classes/InputCheckboxButton.js";
 
 class ChangingSoundLength extends InputCheckboxButton {
     constructor(stateMachine, fallback) {
@@ -18,6 +18,7 @@ class ChangingSoundLength extends InputCheckboxButton {
         const numSamples = Math.floor(this.stateMachine.sampleRate * requestedDuration);
         requestedDuration = numSamples / this.stateMachine.sampleRate;
         if(!this.stateMachine.verifyRateAndDuration(this.stateMachine.sampleRate, requestedDuration, numSamples)) {
+            this.displayError("invalid sample rate and/or duration!");
             return false;
         }
         if(this.changeSpeed.checked) { // resample

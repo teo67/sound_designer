@@ -1,6 +1,6 @@
-import InputCheckboxButton from "./InputCheckboxButton.js";
-import constants from "./constants.js";
-import allFunctions from "./functionLibrary.js";
+import InputCheckboxButton from "../classes/InputCheckboxButton.js";
+import constants from "../util/constants.js";
+import verifyVariable from "../util/verifyVariable.js";
 
 class Importing extends InputCheckboxButton {
     constructor(stateMachine, fallback) {
@@ -27,24 +27,18 @@ class Importing extends InputCheckboxButton {
         this.file = this.makeLabelAndInput("upload file", "file", "");
         this.sampleRate = this.makeLabelAndInput("defer to new sample rate", "checkbox", "");
         this.soundLength = this.makeLabelAndInput("increase sound length if needed", "checkbox", "");
-        this.variableName = this.makeLabelAndInput("store in variable", "text", "i");
+        this.variableName = this.makeLabelAndInput("bind to", "text", "i");
     }
 
     async onSubmit() {
         const varName = this.variableName.value;
-        if(allFunctions[varName] !== undefined) {
-            this.displayError("variable already taken!");
-            return;
-        }
-        for(const char of varName) {
-            if(!constants.letters.includes(char)) {
-                this.displayError("invalid variable name!");
-                return;
-            }
+        if(!verifyVariable(varName)) {
+            this.displayError("invalid variable name!");
+            return false;
         }
         if(this.file.files.length < 1) {
             this.displayError("no file selected!");
-            return;
+            return false;
         }
         const filename = this.file.files[0];
         const res = await this.loadSound(filename);
@@ -63,7 +57,7 @@ class Importing extends InputCheckboxButton {
         theoreticalTotalDuration = totalSamples / theoreticalSampleRate;
         if(!this.stateMachine.verifyRateAndDuration(theoreticalSampleRate, theoreticalTotalDuration, totalSamples)) {
             this.displayError("invalid sample rate and/or duration!");
-            return;
+            return false;
         }
         
         const newSam = this.stateMachine.resample(totalSamples, this.stateMachine.sampleRate/theoreticalSampleRate, this.stateMachine.context.samples);

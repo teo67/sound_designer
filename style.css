@@ -10,6 +10,7 @@ section.input-checkbox {
     z-index: 10;
 }
 
+
 p.input-checkbox {
     display: block;
     position: relative;
@@ -41,10 +42,9 @@ input.input-checkbox {
     margin-left: 1vw;
 }
 
-section.function-library {
+section.function-library, section.binding-library {
     position: fixed;
     z-index: 6;
-    left: 1vw;
     top: 10vw;
     width: 30vw;
     height: calc(100vh - 20vw);
@@ -54,7 +54,31 @@ section.function-library {
     overflow-x: hidden;
 }
 
-div.function {
+div.toggle-libraries {
+    position: fixed;
+    z-index: 6;
+    top: 7vw;
+    left: 1vw;
+    background-color: lightgray;
+    font-size: 1vw;
+    padding: 0.5vw;
+    color: black;
+}
+
+div.toggle-libraries:hover {
+    background-color: grey;
+    color: white;
+}
+
+section.function-library {
+    left: 1vw;
+}
+
+section.binding-library {
+    right: 1vw;
+}
+
+div.function, div.binding {
     margin: 1vw;
     display: block;
     width: 28vw;
@@ -62,6 +86,21 @@ div.function {
     border-radius: 0.5vw;
     padding-top: 1vw;
     padding-bottom: 0.5vw;
+}
+
+div.remove-binding {
+    background-color: lightgray;
+    display: inline-block;
+    margin-left: 1vw;
+    border-radius: 0.5vw;
+    color: red;
+    padding: 1vw;
+}
+
+div.remove-binding:hover {
+    background-color: red;
+    color: lightgray;
+    cursor: pointer;
 }
 
 p.title {
@@ -114,6 +153,7 @@ p.arg-description {
 
 section#samples {
     height: 100vh;
+    width: 100vw;
     position: absolute;
     top: 0;
     left: 0;
@@ -177,17 +217,19 @@ div.sample {
 div.selected {
     position: absolute;
     top: 0;
-    background-color: blue;
+    background-color: black;
     height: 100vh;
     opacity: 0.5;
+    z-index: 2;
 }
 
 div.selecting {
     position: absolute;
     top: 0;
-    background-color: lightblue;
+    background-color: white;
     height: 100vh;
-    opacity: 0.5;
+    opacity: 0.3;
+    z-index: 2;
 }
 
 div#but {
@@ -205,7 +247,7 @@ div#but:hover {
     cursor: pointer;
 }
 
-div#change-sound-length, div#change-sample-rate, div#import {
+div.bottom-button {
     display: inline-block;
     height: 4vw;
     background-color: lightgray;
@@ -214,12 +256,17 @@ div#change-sound-length, div#change-sample-rate, div#import {
     padding-right: 2vw;
     text-align: center;
     line-height: 4vw;
+    font-size: 1.25vw;
 }
 
-div#change-sound-length:hover, div#change-sample-rate:hover, div#import:hover {
+div.bottom-button:not(.disabled):hover {
     border: 1px solid green;
     background-color: lightgreen;
     cursor: pointer;
+}
+
+div.bottom-button.disabled {
+    color: gray;
 }
 
 section#edit-interface {
@@ -229,15 +276,24 @@ section#edit-interface {
     position: fixed;
 }
 
+div#copy input {
+    width: 2vw;
+    font-size: 1.25vw;
+}
+
+div#copy p {
+    display: inline;
+    margin-left: 1vw;
+}
+
 div#cursor-line {
     position: absolute;
-    z-index: 4;
+    z-index: 2;
     top: 0;
     left: 0;
-    height: calc(100vh - 20vw);
-    top: 10vw;
-    width: 2px;
-    background-color: black;
+    height: 100vh;
+    width: 1px;
+    background-color: white;
 }
 
 body {
@@ -247,6 +303,7 @@ body {
     user-select: none; 
 
     font-family: Verdana;
+    background-color: black;
 }
 
 .hidden {

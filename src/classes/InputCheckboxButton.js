@@ -65,8 +65,6 @@ class InputCheckboxButton extends FallbackMode {
     async trySubmit() {
         if(await this.onSubmit()) {
             this.fullFallback(false);
-        } else {
-            this.displayError("invalid arguments!");
         }
     }
 

@@ -1,19 +1,22 @@
-import StateMachine from './src/StateMachine.js';
-import Passive from './src/Passive.js';
-import constants from './src/constants.js';
+import StateMachine from './src/classes/StateMachine.js';
+import Passive from './src/modes/Passive.js';
+import constants from './src/util/constants.js';
 const button = document.getElementById("but");
-const samplesHolder = document.getElementById("samples");
 const cursor = document.getElementById("cursor-line");
 const scroller = document.getElementById("scroller");
 const zoomer = document.getElementById("zoomer");
+const selectable = document.getElementById("selectable");
 
 const initialSampleRate = constants.minSampleRate;
 const initialDuration = 1;
 
 const stateMachine = new StateMachine(initialSampleRate, initialDuration);
 
-samplesHolder.onclick = ev => stateMachine.currentState.onClick(ev);
-cursor.onclick = ev => stateMachine.currentState.onClick(ev);
+document.addEventListener('click', ev => {
+    if(selectable.contains(ev.target)) {
+        stateMachine.currentState.onClick(ev);
+    }
+});
 
 scroller.onmousedown = ev => stateMachine.context.onScrollerDown(ev);
 zoomer.onmousedown = ev => stateMachine.context.onZoomerDown(ev);

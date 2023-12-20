@@ -6,6 +6,16 @@ class Argument {
     }
 }
 
+const getIndex = (context, _i) => {
+    if(_i < 0 || _i >= context.current_s.length) {
+        return 0;
+    }
+    if(_i < context.N || _i >= context.N + context.saved_s.length) {
+        return context.current_s[_i];
+    }
+    return context.saved_s[_i - context.N];
+}
+
 const allFunctions = {
     "y": new Function("Get the y value of the mouse, ranging from -1 to 1.", [], context => context.y),
     "x": new Function("Get the x value of the mouse, ranging from -1 to 1.", [], context => context.x),
@@ -15,13 +25,7 @@ const allFunctions = {
     "N": new Function("Get the starting sample index of the selected region.", [], context => context.N),
     "s": new Function("Get the current value of the sample, from -1 to 1. If an argument is specified, get the value of that sample instead.", [
         new Argument("index", "The index of the sample to get.")
-    ], (context, i = context.n) => {
-        const _i = Math.max(0, Math.min(context.current_s.length, Math.round(i)));
-        if(_i < context.N || _i >= context.N + context.saved_s.length) {
-            return context.current_s[_i];
-        }
-        return context.saved_s[_i - context.N];
-    }),
+    ], (context, i = context.n) => getIndex(context, Math.round(i))),
     "abs": new Function("Get the absolute value of any number.", [
         new Argument("input", "A number")
     ], (_, input = 0) => Math.abs(input)),
@@ -43,7 +47,7 @@ const allFunctions = {
     "log": new Function("Take the logarithm of a number with a given base.", [
         new Argument("value", "The number to take the log of."),
         new Argument("base", "The base of the logarithm (default: e).")
-    ], (_, value, base = Math.E) => Math.log(value)/Math.log(base)),
+    ], (_, value, base = Math.E) => Math.log(value)/Math.log(base))
 }
 
 const makeToneFunction = (name, freq) => {

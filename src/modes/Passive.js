@@ -4,11 +4,13 @@ import Selected from './Selected.js';
 import ChangingSampleRate from './ChangingSampleRate.js';
 import ChangingSoundLength from './ChangingSoundLength.js';
 import Importing from './Importing.js';
+import Exporting from './Exporting.js';
 const changeSampleRate = document.getElementById("change-sample-rate");
 const changeSoundLength = document.getElementById("change-sound-length");
 const importButton = document.getElementById("import");
+const exportButton = document.getElementById("export");
 
-const buttons = [changeSampleRate, changeSoundLength, importButton];
+const buttons = [changeSampleRate, changeSoundLength, importButton, exportButton];
 
 class Passive extends ContextMode {
     constructor(stateMachine, cursor) {
@@ -20,6 +22,7 @@ class Passive extends ContextMode {
         changeSampleRate.onclick = () => this.enterSampleRate();
         changeSoundLength.onclick = () => this.enterSoundLength();
         importButton.onclick = () => this.enterImport();
+        exportButton.onclick = () => this.enterExport();
         for(const button of buttons) {
             if(button.classList.contains('disabled')) {
                 button.classList.remove('disabled');
@@ -34,6 +37,9 @@ class Passive extends ContextMode {
     }
     enterImport() {
         this.stateMachine.enterState(new Importing(this.stateMachine, this));
+    }
+    enterExport() {
+        this.stateMachine.enterState(new Exporting(this.stateMachine, this));
     }
     succeed() {
         for(const button of buttons) {
@@ -62,6 +68,8 @@ class Passive extends ContextMode {
             this.enterSoundLength();
         } else if(event.key == 'i') {
             this.enterImport();
+        } else if(event.key == 'e') {
+            this.enterExport();
         }
     }
 }

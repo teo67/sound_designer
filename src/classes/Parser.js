@@ -13,7 +13,8 @@ const operators = {
     "*": (a, b) => a * b,
     "/": (a, b) => a / b,
     "%": (a, b) => a % b,
-    "**": (a, b) => a ** b
+    "**": (a, b) => a ** b,
+    "//": (a, b) => Math.floor(a/b)
 };
 const isValid = {};
 isValid[TokenTypes.Whitespace] = char => ' \t\n\xa0'.includes(char);
@@ -75,7 +76,7 @@ class Parser {
     }
     parse(bindings) {
         return this.parseOperationSet(['+', '-'], 
-            () => this.parseOperationSet(['*', '/', '%'], 
+            () => this.parseOperationSet(['*', '/', '%', '//'], 
                 () => this.parseOperationSet(['**'], 
                     () => this.parseLowest(bindings))));
     }

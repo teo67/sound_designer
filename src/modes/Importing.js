@@ -61,7 +61,7 @@ class Importing extends InputCheckboxButton {
         }
         
         const newSam = this.stateMachine.resample(totalSamples, this.stateMachine.sampleRate/theoreticalSampleRate, this.stateMachine.context.samples);
-        const importedSam = this.stateMachine.resample(totalSamples, sampleRate/theoreticalSampleRate, samples);
+        const importedSam = this.stateMachine.resample(Math.floor(theoreticalSampleRate * duration), sampleRate/theoreticalSampleRate, samples);
         this.stateMachine.sampleRate = theoreticalSampleRate;
         this.stateMachine.duration = theoreticalTotalDuration;
         this.stateMachine.regen(newSam);
